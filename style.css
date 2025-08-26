@@ -94,74 +94,72 @@ body {
   from { opacity: 1; }
   to   { opacity: 1; }
 }
-/* ===== Smooth Diagonal Snow (Backwards Compatible) ===== */
+/* ===== Smooth Diagonal Snow — fixed density, layering, overlay ===== */
 :root {
   --flake-color: rgba(255, 255, 255, 0.9);
+  --flake-color-faint: rgba(255, 255, 255, 0.6);
   --flake-size-small: 4px;
   --flake-size-large: 6px;
-  --fall-time-small: 14s;
-  --fall-time-large: 18s;
-  --flake-count-small: 30;
-  --flake-count-large: 20;
+  --fall-time-small: 18s;
+  --fall-time-large: 24s;
+  --snow-density-small: 120px; /* smaller = denser */
+  --snow-density-large: 200px;
+  --snow-diagonal: 80px; /* horizontal drift over fall */
 }
 
-/* Base reset for both layers */
+/* White overlay behind everything except content */
+body.snow-theme::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.05); /* subtle frost */
+  z-index: 0; /* behind everything */
+  pointer-events: none;
+}
+
+/* Base layer settings for both snow containers */
 .micro-snow,
 .pixel-snow {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 0; /* ensures snow is BEHIND menus/content */
   overflow: hidden;
 }
 
-/* Generate small flakes */
+/* Small flake layer (more numerous, faint) */
 .micro-snow::before {
-  content: '';
+  content: "";
   position: absolute;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-image:
-    radial-gradient(circle var(--flake-size-small), var(--flake-color) 100%, transparent 0);
+    radial-gradient(circle var(--flake-size-small), var(--flake-color-faint) 100%, transparent 0);
   background-repeat: repeat;
-  background-size: 100% 100%;
+  background-size: var(--snow-density-small) var(--snow-density-small);
   animation: snowfallSmall var(--fall-time-small) linear infinite;
 }
 
-/* Generate large flakes */
+/* Large flake layer (fewer, brighter) */
 .pixel-snow::before {
-  content: '';
+  content: "";
   position: absolute;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-image:
     radial-gradient(circle var(--flake-size-large), var(--flake-color) 100%, transparent 0);
   background-repeat: repeat;
-  background-size: 100% 100%;
+  background-size: var(--snow-density-large) var(--snow-density-large);
   animation: snowfallLarge var(--fall-time-large) linear infinite;
 }
 
-/* Small flake animation: diagonal down-right */
+/* Diagonal animation for variety */
 @keyframes snowfallSmall {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 100px 100vh; /* rightward drift + downward fall */
-  }
+  0% { background-position: 0 0; }
+  100% { background-position: var(--snow-diagonal) 100vh; }
 }
 
-/* Large flake animation: diagonal down-left for variation */
 @keyframes snowfallLarge {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: -80px 100vh; /* leftward drift + downward fall */
-  }
+  0% { background-position: 0 0; }
+  100% { background-position: calc(var(--snow-diagonal) * -1) 100vh; }
 }
 
 /* ========== Ensure menus stay clean above the snow ========== */
@@ -170,4 +168,5 @@ header, nav {
   position: relative;
   z-index: 100;
 }
+
 
